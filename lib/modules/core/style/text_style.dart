@@ -5,7 +5,7 @@ import 'app_color.dart';
 
 abstract class Style {
   static TextStyle get textStyle {
-    return GoogleFonts.dmSans();
+    return GoogleFonts.plusJakartaSans();
   }
 
   static TextStyle defaultStyle = textStyle.copyWith(

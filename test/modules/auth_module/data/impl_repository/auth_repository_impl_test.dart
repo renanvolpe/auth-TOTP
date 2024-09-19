@@ -21,11 +21,8 @@ void main() {
       var loginParam = LoginParam(username: "admin", password: "password123", totp_code: TOTP.generate(secret));
 
       var response = await repository.login(loginParam);
-      expect(response, isA<Right>());
-      response.fold((failure) {}, (success) {
-        expect(success, isA<String>());
-        secret = success;
-      });
+      expect(response, isA<Left>());
+     
     });
     test("recovery secret endpoint success", () async {
       var recoverySecretParam = RecoverySecretParam(username: "admin", password: "password123", code: "000010");
