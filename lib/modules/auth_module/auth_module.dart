@@ -7,6 +7,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'data/abstract_repository/abstract_auth_repository.dart';
 import 'data/impl_repository/auth_repository_impl.dart';
 import 'data/param/login_param.dart';
+import 'presenter/bloc/login/login_bloc.dart';
 import 'presenter/bloc/recovery_pass/recovery_secret_bloc.dart';
 
 class AuthModule extends Module {
@@ -22,6 +23,7 @@ class AuthModule extends Module {
   void binds(Injector i) {
     i.addSingleton<IAuthRepository>(AuthRepositoryImpl.new);
     i.addSingleton(RecoverySecretBloc.new);
+    i.addSingleton(LoginBloc.new);
     super.binds(i);
   }
 

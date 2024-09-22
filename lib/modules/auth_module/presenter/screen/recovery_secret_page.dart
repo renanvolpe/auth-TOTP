@@ -118,6 +118,7 @@ class _RecoverySecretPageState extends State<RecoverySecretPage> {
                     );
 
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    //save TOTP NUMBER this um AppService to use in loginPage
                     Modular.get<AppService>().totpCode = state.totpCode;
                     Modular.to.pop();
                   }

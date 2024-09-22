@@ -4,6 +4,7 @@ import 'package:flutter_dev_test/modules/auth_module/data/abstract_repository/ab
 import 'package:flutter_dev_test/modules/core/utils/endpoint.dart';
 import 'package:flutter_dev_test/modules/core/utils/failure.dart';
 
+import '../../../core/utils/generate_totp.dart';
 import '../../../shared/dio/dio_service.dart';
 import '../param/login_param.dart';
 import '../param/recovery_secret_param.dart';
@@ -30,7 +31,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     try {
       var response = await dio.dioPost(endpoint: Endpoint.recoverySecret, body: recoverySecretParam.toMap());
       return response.fold((failure) => failure, (success) {
-        String totpSecret = success["totp_secret"];
+        var totpSecret = TOTP.generate(success["totp_secret"]);
         return Right(totpSecret);
       });
     } catch (e) {

@@ -1,16 +1,39 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dev_test/modules/app_service.dart';
+import 'package:flutter_dev_test/modules/auth_module/presenter/widget/circular_progress_indicator_default.dart';
 import 'package:flutter_dev_test/modules/core/style/app_color.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/style/text_style.dart';
 import '../../data/param/login_param.dart';
+import '../bloc/login/login_bloc.dart';
 import '../widget/container_primary.dart';
 import '../widget/input_decoration.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  late TextEditingController usesrnameTextController;
+  late TextEditingController passwordTextController;
+
+  late LoginBloc loginBloc;
+
+  @override
+  void initState() {
+    loginBloc = Modular.get<LoginBloc>();
+
+    usesrnameTextController = TextEditingController(text: kDebugMode ? "admin" : "");
+    passwordTextController = TextEditingController(text: kDebugMode ? "password123" : "");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,31 +69,70 @@ class LoginPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         TextField(
-                          controller: TextEditingController(),
+                          controller: usesrnameTextController,
                           decoration: inputDecorationDefault("E-mail"),
                         ),
                         const Gap(10),
                         TextField(
-                          controller: TextEditingController(),
+                          controller: passwordTextController,
                           decoration: inputDecorationDefault("Senha"),
                         ),
                         const Gap(20),
-                        GestureDetector(
-                            onTap: () {
-                              
-                              String totpCode = Modular.get<AppService>().totpCode;
+                        BlocConsumer<LoginBloc, LoginState>(
+                          bloc: loginBloc,
+                          listener: (context, state) {
+                            if (state is LoginFailureTotp) {
+                              if (state.message.contains("Invalid TOTP code")) {
+                                const snackBar = SnackBar(
+                                  content: Text('Informe o código totp para continuar'),
+                                );
 
-                              var param = LoginParam(username: "admin", password: "password123", totp_code: totpCode);
-                              Modular.to.pushNamed('/recovery-secret', arguments: param);
-                              // Modular.to.pushNamed('/home/');
-                            },
-                            child: ContainerPrimary(
-                              child: Text(
-                                "Entrar",
-                                textAlign: TextAlign.center,
-                                style: Style.whiteStyle,
-                              ),
-                            ))
+                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                var param = LoginParam(
+                                    username: usesrnameTextController.text,
+                                    password: passwordTextController.text,
+                                    totp_code: '');
+
+                                Modular.to.pushNamed("recovery-secret", arguments: param);
+                              } else if (state is LoginFailure) {
+                                const snackBar = SnackBar(
+                                  content: Text('Informe credenciais válidas para continuar'),
+                                );
+
+                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                              }
+                            }
+                            if (state is LoginSuccess) {
+                              const snackBar = SnackBar(
+                                content: Text('Login realizado com sucesso'),
+                              );
+
+                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                              Modular.to.pushNamed("/home/");
+                            }
+                          },
+                          builder: (context, state) {
+                            return state is LoginProgress
+                                ? const ContainerPrimary(
+                                    child: CircularProgressIndicatorDefault(),
+                                  )
+                                : GestureDetector(
+                                    onTap: () {
+                                      String totpCode = Modular.get<AppService>().totpCode;
+
+                                      var param =
+                                          LoginParam(username: "admin", password: "password123", totp_code: totpCode);
+                                      loginBloc.add(LoginStarted(param));
+                                    },
+                                    child: ContainerPrimary(
+                                      child: Text(
+                                        "Entrar",
+                                        textAlign: TextAlign.center,
+                                        style: Style.whiteStyle,
+                                      ),
+                                    ));
+                          },
+                        )
                       ],
                     ),
                   ),

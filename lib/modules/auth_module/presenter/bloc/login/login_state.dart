@@ -8,6 +8,12 @@ final class LoginSuccess extends LoginState {
   final dynamic value;
   LoginSuccess(this.value);
 }
+
+final class LoginFailureTotp extends LoginState {
+  final String message;
+  LoginFailureTotp(this.message);
+}
+
 final class LoginFailure extends LoginState {
   final String message;
   LoginFailure(this.message);
