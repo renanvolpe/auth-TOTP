@@ -6,6 +6,18 @@ abstract class Failure extends Equatable {
   String? get message => "Error happened";
 }
 
+class UnauthorizedFailure extends Failure {
+  final String? _message;
+
+  const UnauthorizedFailure([String? message]) : _message = message;
+
+  @override
+  String get message => _message ?? "Unauthorized in Error, try again later";
+
+  @override
+  List<Object> get props => [_message ?? ""];
+}
+
 class ServerFailure extends Failure {
   @override
   final String message = "Server in Error, wait for a moment";
