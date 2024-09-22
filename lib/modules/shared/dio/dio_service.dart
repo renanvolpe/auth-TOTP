@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dev_test/modules/core/utils/failure.dart';
 
 import '../../core/utils/logger.dart';
 import 'request_utils.dart';
@@ -45,6 +46,7 @@ class DioClient implements DioService {
     }
     return Left(errorMessage);
   }
+
 //   DioException (DioException [connection error]: The connection errored: Connection refused This indicates an error which most likely cannot be solved by the library.
 // Error: SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = 127.0.0.1, port = 46264)
   @override
@@ -108,23 +110,22 @@ class DioClient implements DioService {
 }
 
 class ErrorTretment {
-  static String getError(DioException e) {
-    _printLoggError(e, "");
-    String errorMessage = "some erro";
+  static Failure getError(DioException e) {
+    String errorMessage = e.response?.data["message"];
+    String statusCode = e.response!.statusCode.toString();
 
-    return errorMessage;
+    _printLoggError(e, errorMessage);
+
+    if (statusCode == "401") {
+      var failure = UnauthorizedFailure(errorMessage);
+      return failure;
+    } else if (statusCode.startsWith("5")) {
+      return ServerFailure(errorMessage);
+    }
+
+    return UnexpectedFailure(errorMessage);
   }
 
   static void _printLoggError(DioException e, String errorMessage) => Logg.error(
       "ENDPOINT :: ${e.requestOptions.path} \nVERB :: ${e.requestOptions.method}  \nSTATUS CODE :: ${e.response?.statusCode}  \nErrorMessage :: $errorMessage");
-}
-
-class ResponseCode {
-  static const int SUCCESS = 200; // success with data
-  static const int NO_CONTENT = 201; // success with no data (no content)
-  static const int BAD_REQUEST = 400; // failure, API rejected request
-  static const int UNAUTORISED = 401; // failure, user is not authorised
-  static const int FORBIDDEN = 403; //  failure, API rejected request
-  static const int INTERNAL_SERVER_ERROR = 500; // failure, crash in server side
-  static const int NOT_FOUND = 404; // failure, not found
 }

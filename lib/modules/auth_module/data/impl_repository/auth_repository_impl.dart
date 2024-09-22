@@ -13,10 +13,10 @@ class AuthRepositoryImpl implements IAuthRepository {
   AuthRepositoryImpl(this.dio);
 
   @override
-  login(LoginParam loginParam) async{
+  Future<Either<Failure, String>> login(LoginParam loginParam) async{
     try {
       var response = await dio.dioPost(endpoint: Endpoint.login, body: loginParam.toMap());
-      return response.fold((failure) => failure, (success) {
+      return response.fold((failure) => Left(failure), (success) {
         String totpSecret = success["message"];
         return Right(totpSecret);
       });
