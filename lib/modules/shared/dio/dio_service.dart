@@ -7,9 +7,10 @@ import '../../core/utils/logger.dart';
 import 'request_utils.dart';
 
 abstract class DioService {
-  Future<Either<dynamic, dynamic>>  dioGet({required String endpoint, bool withToken = true, Map<String, String>? params});
-  Future<Either<dynamic, dynamic>>  dioPost({required String endpoint, required Map body});
-  Future<Either<dynamic, dynamic>>  dioPut({required String endpoint, required Map body, String? token});
+  Future<Either<dynamic, dynamic>> dioGet(
+      {required String endpoint, bool withToken = true, Map<String, String>? params});
+  Future<Either<dynamic, dynamic>> dioPost({required String endpoint, required Map body});
+  Future<Either<dynamic, dynamic>> dioPut({required String endpoint, required Map body, String? token});
   Future<Either<dynamic, dynamic>> dioDelete({required String endpoint, required Map body});
   Future<Either<dynamic, dynamic>> dioPatch({required String endpoint, required Map body, String? token});
 }
@@ -44,7 +45,8 @@ class DioClient implements DioService {
     }
     return Left(errorMessage);
   }
-
+//   DioException (DioException [connection error]: The connection errored: Connection refused This indicates an error which most likely cannot be solved by the library.
+// Error: SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = 127.0.0.1, port = 46264)
   @override
   Future<Either<dynamic, dynamic>> dioPost({required String endpoint, required Map body}) async {
     dynamic errorMessage;
@@ -107,6 +109,7 @@ class DioClient implements DioService {
 
 class ErrorTretment {
   static String getError(DioException e) {
+    _printLoggError(e, "");
     String errorMessage = "some erro";
 
     return errorMessage;

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dev_test/modules/app_service.dart';
 import 'package:flutter_dev_test/modules/core/style/app_color.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/style/text_style.dart';
+import '../../data/param/login_param.dart';
 import '../widget/container_primary.dart';
 import '../widget/input_decoration.dart';
 
@@ -55,8 +57,12 @@ class LoginPage extends StatelessWidget {
                         const Gap(20),
                         GestureDetector(
                             onTap: () {
-                              // Modular.to.pushNamed('/recovery-secret');
-                              Modular.to.pushNamed('/home/');
+                              
+                              String totpCode = Modular.get<AppService>().totpCode;
+
+                              var param = LoginParam(username: "admin", password: "password123", totp_code: totpCode);
+                              Modular.to.pushNamed('/recovery-secret', arguments: param);
+                              // Modular.to.pushNamed('/home/');
                             },
                             child: ContainerPrimary(
                               child: Text(

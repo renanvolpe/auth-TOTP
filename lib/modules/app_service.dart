@@ -1,3 +1,3 @@
 class AppService {
-  String token = '';
+  String totpCode = '';
 }
