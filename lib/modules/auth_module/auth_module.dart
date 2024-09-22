@@ -23,7 +23,7 @@ class AuthModule extends Module {
   void binds(Injector i) {
     i.addSingleton<IAuthRepository>(AuthRepositoryImpl.new);
     i.addSingleton(RecoverySecretBloc.new);
-    i.addSingleton(LoginBloc.new);
+    i.add(LoginBloc.new);
     super.binds(i);
   }
 

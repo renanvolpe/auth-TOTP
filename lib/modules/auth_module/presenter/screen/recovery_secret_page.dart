@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dev_test/modules/app_service.dart';
-import 'package:flutter_dev_test/modules/auth_module/presenter/widget/container_primary.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:gap/gap.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -11,7 +8,7 @@ import '../../../core/style/text_style.dart';
 import '../../data/param/login_param.dart';
 import '../../data/param/recovery_secret_param.dart';
 import '../bloc/recovery_pass/recovery_secret_bloc.dart';
-import '../widget/circular_progress_indicator_default.dart';
+import '../widget/btn_recovery_secret.dart';
 
 class RecoverySecretPage extends StatefulWidget {
   const RecoverySecretPage({super.key, required this.loginParam});
@@ -43,6 +40,7 @@ class _RecoverySecretPageState extends State<RecoverySecretPage> {
 
   @override
   Widget build(BuildContext context) {
+    var loginParam = widget.loginParam;
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -89,8 +87,12 @@ class _RecoverySecretPageState extends State<RecoverySecretPage> {
                     blurRadius: 10,
                   )
                 ],
-                onCompleted: (v) {
-                  debugPrint("Completed");
+                onCompleted: (value) {
+                  String username = loginParam.username;
+                  String password = loginParam.password;
+                  RecoverySecretParam param =
+                      RecoverySecretParam(username: username, password: password, code: codeTextController.text);
+                  recoverySecretBloc.add(RecoverySecretStarted(param));
                 },
                 onChanged: (value) {
                   debugPrint(value);
@@ -102,50 +104,9 @@ class _RecoverySecretPageState extends State<RecoverySecretPage> {
                 },
               ),
               const Gap(20),
-              BlocConsumer<RecoverySecretBloc, RecoverySecretState>(
-                bloc: recoverySecretBloc,
-                listener: (context, state) {
-                  if (state is RecoverySecretFailure) {
-                    const snackBar = SnackBar(
-                      content: Text('Código inválido'),
-                    );
-
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  }
-                  if (state is RecoverySecretSuccess) {
-                    const snackBar = SnackBar(
-                      content: Text('Código salvo, faça o login para prosseguir'),
-                    );
-
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    //save TOTP NUMBER this um AppService to use in loginPage
-                    Modular.get<AppService>().totpCode = state.totpCode;
-                    Modular.to.pop();
-                  }
-                },
-                builder: (context, state) {
-                  return AbsorbPointer(
-                    absorbing: state is RecoverySecretProgress,
-                    child: GestureDetector(
-                      onTap: () {
-                        String username = widget.loginParam.username;
-                        String password = widget.loginParam.password;
-                        RecoverySecretParam param =
-                            RecoverySecretParam(username: username, password: password, code: codeTextController.text);
-                        recoverySecretBloc.add(RecoverySecretStarted(param));
-                      },
-                      child: ContainerPrimary(
-                        child: state is RecoverySecretProgress
-                            ? const CircularProgressIndicatorDefault()
-                            : Text(
-                                "Continuar",
-                                textAlign: TextAlign.center,
-                                style: Style.whiteStyle,
-                              ),
-                      ),
-                    ),
-                  );
-                },
+              BtnRecoverySecret(
+                loginParam: loginParam,
+                codeTextController: codeTextController,
               ),
               const Gap(30),
               Row(
